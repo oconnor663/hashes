@@ -14,6 +14,8 @@ digest = "0.8"
 byte-tools = "0.3"
 crypto-mac = "0.7"
 opaque-debug = "0.2"
+blake2b_simd = { version = "0.5", default-features = false }
+blake2s_simd = { version = "0.5", default-features = false }
 
 [dev-dependencies]
 digest = { version = "0.8", features = ["dev"] }
@@ -22,10 +24,7 @@ hex-literal = "0.1"
 
 [features]
 default = ["std"]
-std = ["digest/std", "crypto-mac/std"]
-simd = []
-simd_opt = ["simd"]
-simd_asm = ["simd_opt"]
+std = ["digest/std", "crypto-mac/std", "blake2b_simd/std", "blake2s_simd/std"]
 
 [badges]
 travis-ci = { repository = "RustCrypto/hashes" }

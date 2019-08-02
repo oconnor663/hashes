@@ -79,10 +79,11 @@
 //! ```
 //!
 //! # Acknowledgment
-//! Based on the [blake2-rfc][2] crate.
+//! Based on the [`blake2b_simd`][2] and [`blake2s_simd`][3] crates.
 //!
 //! [1]: https://en.wikipedia.org/wiki/BLAKE_(hash_function)#BLAKE2
-//! [2]: https://github.com/cesarb/blake2-rfc
+//! [2]: https://crates.io/crates/blake2b_simd
+//! [3]: https://crates.io/crates/blake2s_simd
 #![no_std]
 #![doc(html_logo_url =
     "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]
@@ -95,15 +96,11 @@
 #[macro_use] pub extern crate digest;
 extern crate byte_tools;
 pub extern crate crypto_mac;
+extern crate blake2b_simd;
+extern crate blake2s_simd;
 
 #[cfg(feature = "std")]
 extern crate std;
-
-mod consts;
-mod as_bytes;
-
-mod simd;
-
 
 #[macro_use]
 mod blake2;
