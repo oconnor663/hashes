@@ -1,7 +1,7 @@
 macro_rules! blake2_impl {
     (
         $state:ident, $fix_state:ident, $word:ident, $bytes:ident,
-        $vardoc:expr, $doc:expr, $lib:ident,
+        $vardoc:expr, $doc:expr, $params_type:ty, $state_type:ty,
     ) => {
         use digest::{Input, BlockInput, FixedOutput, VariableOutput, Reset};
         use digest::InvalidOutputSize;
@@ -10,16 +10,13 @@ macro_rules! blake2_impl {
         use byte_tools::copy;
         use crypto_mac::{Mac, MacResult, InvalidKeyLength};
 
-        use $lib::Params;
-        use $lib::State;
-
         type Output = GenericArray<u8, $bytes>;
 
         #[derive(Clone)]
         #[doc=$vardoc]
         pub struct $state {
-            params: Params,
-            state: State,
+            params: $params_type,
+            state: $state_type,
             output_size: usize,
         }
 
@@ -30,7 +27,7 @@ macro_rules! blake2_impl {
             /// make sure to compare codes in constant time! It can be done
             /// for example by using `subtle` crate.
             pub fn new_keyed(key: &[u8], output_size: usize) -> Self {
-                let mut params = Params::new();
+                let mut params = <$params_type>::new();
                 params.hash_length(output_size);
                 params.key(key);
                 Self {
@@ -45,13 +42,7 @@ macro_rules! blake2_impl {
                 self.state.update(data);
             }
 
-            #[doc(hidden)]
-            pub fn finalize_last_node(self) -> Output {
-                self.finalize_with_last_node(true)
-            }
-
-            fn finalize_with_last_node(mut self, last_node: bool) -> Output {
-                self.state.set_last_node(last_node);
+            fn finalize(self) -> Output {
                 let hash = self.state.finalize();
                 let mut out = GenericArray::default();
                 copy(hash.as_bytes(), &mut out);
@@ -87,7 +78,7 @@ macro_rules! blake2_impl {
 
             fn variable_result<F: FnOnce(&[u8])>(self, f: F) {
                 let n = self.output_size;
-                let res = self.finalize_with_last_node(false);
+                let res = self.finalize();
                 f(&res[..n]);
             }
         }
@@ -129,7 +120,7 @@ macro_rules! blake2_impl {
             type OutputSize = $bytes;
 
             fn fixed_result(self) -> Output {
-                self.state.finalize_with_last_node(false)
+                self.state.finalize()
             }
         }
 
@@ -164,7 +155,7 @@ macro_rules! blake2_impl {
             }
 
             fn result(self) -> MacResult<Self::OutputSize> {
-                MacResult::new(self.state.finalize_with_last_node(false))
+                MacResult::new(self.state.finalize())
             }
         }
 
